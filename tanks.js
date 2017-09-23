@@ -120,7 +120,7 @@ function PlayerTank(width, height, image, x, y, type) {
 }
 
 //ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY ENEMY
-function EnemyTank(width, height, image, position, type) {
+function EnemyTank(width, height, image, position, startFrame, type) {
     switch (position) {
         case 0:
             this.x = 0;
@@ -140,19 +140,23 @@ function EnemyTank(width, height, image, position, type) {
             break;
     }
     this.type = type;
+    this.startFrame = startFrame;
     this.image = new Image();
     this.image.src = image;
     this.width = width;
     this.height = height;
     this.speedX = 0;
     this.speedY = 0;
-    this.direction = "down";
+    this.direction = "none";
     this.update = function() { 
         ctx = myGameArea.context;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     };
     this.newPos = function() { 
         switch (this.direction) {
+            case "none":
+                this.startMove(myGameArea.frameNo);
+            break;
             case "up":
                 this.speedX = 0;
                 this.speedY = -1;
@@ -171,9 +175,10 @@ function EnemyTank(width, height, image, position, type) {
                 break;
             default:
                 this.speedX = 0;
-                this.speedY = -1;
+                this.speedY = 0;
                 break;
         }
+
         // this.speedY = 1;
 
         this.x += this.speedX;
@@ -246,6 +251,15 @@ function EnemyTank(width, height, image, position, type) {
                     break;
             }
      }
+    this.startMove = function(currentFrame) { 
+        // if ((myGameArea.frameNo / n) % 1 == 0) {
+        //     this.direction = "down";
+        // }
+        if ((currentFrame - this.startFrame) > 80) {
+            this.direction = "down";
+        } 
+    }
+
 }
 
 function Bullet(sender) {
@@ -293,7 +307,7 @@ function Bullet(sender) {
         ctx = myGameArea.context;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     };
-    this.newPos = function() { 
+    this.newPos = function(object) { 
         this.x += this.speedX;
         this.y += this.speedY;
         // // this.hitBottom();
@@ -307,6 +321,10 @@ function Bullet(sender) {
         var borderTop = 0 + this.height;
         var borderLeft = 0 + this.width;
         var borderRight = myGameArea.canvas.width - this.width;
+
+        //новый абза
+
+
         if (this.y > borderBottom) {
             bullet.pop();
             sender.fired = false;
@@ -338,8 +356,25 @@ function Bullet(sender) {
             crash = false; 
         }
         return crash;
-     }
 
+        
+     }
+     this.collisionCheck = function (object) { 
+        for (var i = 0; i < object.length; i++) {
+            if (typeof object[i] != "undefined") {
+                if ((this.y < object[i].y + object[i].height) &&
+                    (this.y > object[i].y) &&
+                    (this.x > object[i].x) &&
+                    (this.x < object[i].x + object[i].width)) {
+                    bullet.pop();
+                    sender.fired = false;
+                    delete object[i];
+                }
+                
+            }
+            
+        }
+      }
 }
 
 
@@ -355,7 +390,8 @@ function startGame() {
             // enemyTanks.push(new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i*200, 0));
 
             if (typeof enemyTanks[i] == "undefined") {
-                enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i);
+                enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i, myGameArea.frameNo);
+                
             }
             
         }
@@ -372,17 +408,28 @@ function startGame() {
 
 function updateGameArea() {
     myGameArea.clear();
+    myGameArea.frameNo += 1;
     myTank.newPos();
     myTank.update();
     for (var i = 0; i < bullet.length; i++) {
         bullet[i].update();
         bullet[i].newPos();
-        
     }
 
     for (var i = 0; i < enemyTanks.length; i++) {
-        enemyTanks[i].update();
-        enemyTanks[i].newPos();
+        if (typeof enemyTanks[i] != "undefined") {
+            
+            enemyTanks[i].update();
+            enemyTanks[i].newPos();
+            //enemyTanks[i].startMove(myGameArea.frameNo);
+        } else {
+            enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i, myGameArea.frameNo)
+            
+        }
+        
+        for (var j = 0; j < bullet.length; j++) {
+            bullet[j].collisionCheck(enemyTanks)
+        }
     }   
     
 
