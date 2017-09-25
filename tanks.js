@@ -6,12 +6,12 @@ var enemyBullets = [];
 var bullet = [];
 var enemyTanks = [];
 var background;
+var myBase = [];
 
 // types:
 // 0 - empty
 // 1 - brick
 // 2 - concrete
-// 3 - grass
 
 var map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -45,6 +45,7 @@ var map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 var myGameArea = {
     canvas: document.createElement("canvas"),
     start: function () {
+        this.state = "new game"
         this.canvas.width = 600;
         this.canvas.height = 600;
         this.leftBorder = 100;
@@ -67,18 +68,6 @@ var myGameArea = {
             myGameArea.keys[e.keyCode] = false;
             this.fired = false;
         });
-        document.addEventListener("mousedown", function (e) {
-            // myGamePiece.gravity = -0.2;
-        });
-        document.addEventListener("mouseup", function (e) {
-            // myGamePiece.gravity = 0.1;
-        });
-
-        // window.addEventListener("mousemove", function (e) { 
-        //     //надо добавить оффсеты
-        //     myGameArea.x = e.pageX - myGameArea.canvas.offsetLeft;
-        //     myGameArea.y = e.pageY - myGameArea.canvas.offsetTop;
-        //  });
     },
     clear: function () {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -92,22 +81,14 @@ var myGameArea = {
             for (var j = 0; j < row.length; j++) {
                 var element = row[j];
                 switch (element) {
-                    case 0:
-                    
-                        break;
                     case 1:
                         myObstacles.push(new Obstacle(15, 15, "images/wall_brick.png", myGameArea.leftBorder + j*15, myGameArea.topBorder + i*15, 1))
                         break;
                     case 2:
                         myObstacles.push(new Obstacle(15, 15, "images/wall_concrete.png", myGameArea.leftBorder + j*15, myGameArea.topBorder + i*15, 2))
                         break;
-                    default:
-                        break;
                 }
-                
-                
-            }
-            
+            } 
         }
      }
 }
@@ -154,20 +135,15 @@ function PlayerTank(width, height, image, x, y, type) {
         if (myGameArea.keys && myGameArea.keys[40]) { this.speedY = 1; this.image.src = "images/tank_player1_down_c0_t1.png"; this.direction = "down" };
         if (myGameArea.keys && myGameArea.keys[32]) { if (!this.fired) { this.shoot() }; };
 
-
         this.x += this.speedX;
         this.y += this.speedY;
-        // this.hitBottom();
-        // this.hitTop();
-        // this.hitLeft();
-        // this.hitRight();
-        // this.borderCheck();
     };
     this.borderCheck = function (object, i) {
         var borderBottom = myGameArea.bottomBorder - this.height;
         var borderTop = myGameArea.topBorder;
         var borderLeft = myGameArea.leftBorder;
         var borderRight = myGameArea.rightBorder - this.width;
+
         if (this.y > borderBottom) {
             this.y = borderBottom;
         } else if (this.y < borderTop) {
@@ -196,32 +172,10 @@ function PlayerTank(width, height, image, x, y, type) {
                         } else if (this.direction == "left") {
                             this.x += 1;
                         }
-
-                        
-
-
                         return "collided";
-                    }
                 }
+            }
         }
-    }
-    this.crashWith = function (otherObj) {
-        var myLeft = this.x;
-        var myRight = this.x + this.width;
-        var myTop = this.y;
-        var myBottom = this.y + this.height;
-        var otherLeft = otherObj.x;
-        var otherRight = otherObj.x + otherObj.width;
-        var otherTop = otherObj.y;
-        var otherBottom = otherObj.y + otherObj.height;
-        var crash = true;
-        if ((myBottom < otherTop) ||
-            (myTop > otherBottom) ||
-            (myLeft > otherRight) ||
-            (myRight < otherLeft)) {
-            crash = false;
-        }
-        return crash;
     }
     this.shoot = function () {
         bullet.push(new Bullet(this));
@@ -263,7 +217,6 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     };
     this.newPos = function (col) {
-        
         switch (this.direction) {
             case "none":
                 this.startMove(myGameArea.frameNo);
@@ -271,21 +224,17 @@ function EnemyTank(width, height, image, position, type, startFrame) {
             case "up":
                 this.speedX = 0;
                 this.speedY = -1;
-                // this.speedY = 0;
                 break;
             case "down":
                 this.speedX = 0;
                 this.speedY = 1;
-                // this.speedY = 0;
                 break;
             case "left":
                 this.speedX = -1;
-                // this.speedX = 0;
                 this.speedY = 0;
                 break;
             case "right":
                 this.speedX = 1;
-                // this.speedX = 0;
                 this.speedY = 0;
                 break;
             default:
@@ -297,25 +246,18 @@ function EnemyTank(width, height, image, position, type, startFrame) {
             if (!this.fired) {
                 this.shoot()
             };
-
         }
-
-        // this.speedY = 1;
         if (col != "collided") {
             this.x += this.speedX;
             this.y += this.speedY;
         }
-        // this.hitBottom();
-        // this.hitTop();
-        // this.hitLeft();
-        // this.hitRight();
-        // this.borderCheck();
     };
     this.borderCheck = function (object, i) {
         var borderBottom = myGameArea.bottomBorder - this.height;
         var borderTop = myGameArea.topBorder;
         var borderLeft = myGameArea.leftBorder;
         var borderRight = myGameArea.rightBorder - this.width;
+
         if (this.y > borderBottom) {
             this.y = borderBottom;
             this.speedX = 0;
@@ -351,41 +293,19 @@ function EnemyTank(width, height, image, position, type, startFrame) {
                         this.speedX = 0;
                         this.speedY = 0;
                         this.defineDirection(this.direction);
-
-
                         return "collided";
-                    }
                 }
+            }
         }
-    }
-    this.crashWith = function (otherObj) {
-        var myLeft = this.x;
-        var myRight = this.x + this.width;
-        var myTop = this.y;
-        var myBottom = this.y + this.height;
-        var otherLeft = otherObj.x;
-        var otherRight = otherObj.x + otherObj.width;
-        var otherTop = otherObj.y;
-        var otherBottom = otherObj.y + otherObj.height;
-        var crash = true;
-        if ((myBottom < otherTop) ||
-            (myTop > otherBottom) ||
-            (myLeft > otherRight) ||
-            (myRight < otherLeft)) {
-            crash = false;
-        }
-        return crash;
     }
     this.shoot = function () {
         enemyBullets.push(new Bullet(this));
         this.fired = true;
     }
     this.defineDirection = function (dir) {
-
         var dirNum;
         if (dir == "up") {
             dirNum = 0;
-            
             (this.y != myGameArea.topBorder) && (this.y += 1);
         } else if (dir == "right") {
             dirNum = 1;
@@ -403,8 +323,6 @@ function EnemyTank(width, height, image, position, type, startFrame) {
             
         } while (y == dirNum);
 
-
-        
         switch (y) {
             case 0:
                 this.direction = "up";
@@ -434,15 +352,11 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         }
     }
     this.startMove = function (currentFrame) {
-        // if ((myGameArea.frameNo / n) % 1 == 0) {
-        //     this.direction = "down";
-        // }
         if ((currentFrame - this.startFrame) > 80) {
             this.direction = "down"
             this.speedY = 1;
         }
     }
-
 }
 
 //BULLET BULLET BULLET BULLET BULLET BULLET BULLET BULLET BULLET
@@ -483,8 +397,6 @@ function Bullet(sender) {
             this.speedY = 0;
             break;
         default:
-            // this.x = sender.x + sender.width/2;
-            // this.y = sender.y + sender.height;
             this.speedX = 0;
             this.speedY = -2;
             break;
@@ -496,10 +408,6 @@ function Bullet(sender) {
     this.newPos = function (object) {
         this.x += this.speedX;
         this.y += this.speedY;
-        // // this.hitBottom();
-        // // this.hitTop();
-        // // this.hitLeft();
-        // // this.hitRight();
         this.borderCheck(object);
     };
     this.borderCheck = function (i) {
@@ -507,7 +415,6 @@ function Bullet(sender) {
         var borderTop = myGameArea.topBorder + this.height;
         var borderLeft = myGameArea.leftBorder + this.width;
         var borderRight = myGameArea.rightBorder - this.width;
-
 
         if (this.y > borderBottom) {
             (sender.type == "player") ? bullet.pop() : delete enemyBullets[i];
@@ -540,8 +447,6 @@ function Bullet(sender) {
             crash = false;
         }
         return crash;
-
-
     }
     //переписать чтобы выдавал тру фолс и удалять на уровне апдейта экрана
     this.collisionCheck = function (object, number) {
@@ -564,7 +469,7 @@ function Bullet(sender) {
                         delete enemyBullets[number];
                         sender.fired = false;
                         object[i].lives--;
-                        object[i].x = myGameArea.leftBorder + 160;
+                        object[i].x = myGameArea.leftBorder + 120;
                         object[i].y = myGameArea.bottomBorder - object[i].height;
                         if (object[i].lives == 0) {
                             alert("GAME OVER");
@@ -574,28 +479,15 @@ function Bullet(sender) {
                         (sender.type == "player") ? bullet.pop() : delete enemyBullets[number];
                         sender.fired = false;
                         (object[i].type == "1" ) && delete object[i];
-
+                    } else if (object[i].type == "base") {
+                        object[i].image.src = "images/base_destroyed.png";
+                        sender.fired = false;
+                        myGameArea.state = "GAME OVER";
                     }
                 }
             }
         }
     }
-
-    // for (var i = 0; i < object.length; i++) {
-    //     if (typeof object[i] != "undefined") {
-    //         if ((this.y < object[i].y + object[i].height) &&
-    //             (this.y > object[i].y) &&
-    //             (this.x > object[i].x) &&
-    //             (this.x < object[i].x + object[i].width)) {
-    //             bullet.pop();
-    //             sender.fired = false;
-    //             delete object[i];
-    //         }
-
-    //     }       
-    // }  
-
-
 }
 
 //OBSTACLES OBSTACLES OBSTACLES OBSTACLES OBSTACLES OBSTACLES 
@@ -614,33 +506,19 @@ function Obstacle(width, height, image, x, y, type) {
 }
 
 
-
-
 function startGame() {
     myGameArea.start();
     myGameArea.generateMap(map);
+    myBase.push(new Obstacle(30, 30, "images/base.png", (myGameArea.leftBorder + myGameArea.rightBorder)/2 - 15, myGameArea.bottomBorder - 30, "base"));
     background = new BackgroundAndScores(myGameArea.leftBorder, myGameArea.topBorder, myGameArea.workSpaceX, myGameArea.workSpaceY);
-    //myTank = new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", 170, 470, "player")
     myTanks.push(new PlayerTank(28, 28, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
     setTimeout(function () {
         for (var i = 0; i < 3; i++) {
-            // enemyTanks.push(new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i*200, 0));
-
             if (typeof enemyTanks[i] == "undefined") {
                 enemyTanks[i] = new EnemyTank(28, 28, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo);
-
             }
-
         }
     }, 1000);
-
-
-    // enemyTank1 = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", 1, 1)
-
-    // myGamePiece = new Component(30, 30, "red", 10, 120);
-    // myGamePiece = new Component(30, 30, "tank_player1_right_c0_t1.png", 10, 120, "image");
-    // myObstacle = new Component(10, 200, "green", 300, 120);
-    // myScore = new Component("30px", "Consolas", "black", 280, 40, "text");
 }
 
 function updateGameArea() {
@@ -652,20 +530,19 @@ function updateGameArea() {
         if (typeof myObstacles[i] != "undefined") {
             myObstacles[i].update();
         }
-        
-        
     }
 
+    for (var i = 0; i < myBase.length; i++) {
+        if (typeof myBase[i] != "undefined") {
+            myBase[i].update();
+        }
+    }
 
-    //myTank.newPos();
-    //myTank.update();
     for (var i = 0; i < myTanks.length; i++) {
         if (typeof myTanks[i] != "undefined") {
             myTanks[i].newPos();
             myTanks[i].update();
             myTanks[i].borderCheck(myObstacles);
-            
-
         }
     }
 
@@ -673,7 +550,6 @@ function updateGameArea() {
         if (typeof bullet[i] != "undefined") {
             bullet[i].update();
             bullet[i].collisionCheck(myObstacles, i);
-            
             if (typeof bullet[i] != "undefined") {
                 bullet[i].newPos();
             }
@@ -681,34 +557,37 @@ function updateGameArea() {
     }
 
     for (var i = 0; i < enemyBullets.length; i++) {
-       
         if (typeof enemyBullets[i] != "undefined") {
             enemyBullets[i].update();
             enemyBullets[i].collisionCheck(myTanks, i);
+            (typeof enemyBullets[i] != "undefined") && enemyBullets[i].collisionCheck(myBase, i);
             (typeof enemyBullets[i] != "undefined") && enemyBullets[i].collisionCheck(myObstacles, i);
             if (typeof enemyBullets[i] != "undefined") {
                 enemyBullets[i].newPos(i);
-            }
-
-            
+            }       
         }
     }
-
-
 
     for (var i = 0; i < enemyTanks.length; i++) {
         if (typeof enemyTanks[i] != "undefined") {
             enemyTanks[i].update();
             enemyTanks[i].newPos();
             enemyTanks[i].borderCheck(myObstacles);
-
-            // (enemyTanks[i].borderCheck(myObstacles) != "collided") && enemyTanks[i].newPos();
-            //enemyTanks[i].startMove(myGameArea.frameNo);
         } else {
-            enemyTanks[i] = new EnemyTank(29, 29, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo)
+            enemyTanks[i] = new EnemyTank(28, 28, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo)
         }
-        for (var j = 0; j < bullet.length; j++) {
-            bullet[j].collisionCheck(enemyTanks, j)
-        }
+    }
+    
+    for (var j = 0; j < bullet.length; j++) {
+        bullet[j].collisionCheck(enemyTanks, j)
+        bullet[j].collisionCheck(myBase, j)
+    }
+    
+    if (myGameArea.state == "GAME OVER") {
+        myGameArea.state = "GAME OVER";   
+        setTimeout(function() {
+            alert("GAME OVER");
+            document.location.reload();
+        }, 21);
     }
 }
