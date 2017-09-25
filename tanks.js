@@ -161,9 +161,9 @@ function PlayerTank(width, height, image, x, y, type) {
         // this.hitTop();
         // this.hitLeft();
         // this.hitRight();
-        this.borderCheck();
+        // this.borderCheck();
     };
-    this.borderCheck = function () {
+    this.borderCheck = function (object, i) {
         var borderBottom = myGameArea.bottomBorder - this.height;
         var borderTop = myGameArea.topBorder;
         var borderLeft = myGameArea.leftBorder;
@@ -176,6 +176,33 @@ function PlayerTank(width, height, image, x, y, type) {
             this.x = borderLeft;
         } else if (this.x > borderRight) {
             this.x = borderRight;
+        }
+
+        for (var i = 0; i < object.length; i++) {
+            if (typeof object[i] != "undefined") {
+                if ((this.y < object[i].y + object[i].height) &&
+                    (this.y + this.height > object[i].y) &&
+                    (this.x + this.width > object[i].x) &&
+                    (this.x < object[i].x + object[i].width)) {
+                        this.speedX = 0;
+                        this.speedY = 0;
+                        
+                        if (this.direction == "up") {
+                            this.y += 1;
+                        } else if (this.direction == "right") {
+                            this.x -= 1  
+                        } else if (this.direction == "down") {
+                            this.y -= 1;
+                        } else if (this.direction == "left") {
+                            this.x += 1;
+                        }
+
+                        
+
+
+                        return "collided";
+                    }
+                }
         }
     }
     this.crashWith = function (otherObj) {
@@ -594,13 +621,13 @@ function startGame() {
     myGameArea.generateMap(map);
     background = new BackgroundAndScores(myGameArea.leftBorder, myGameArea.topBorder, myGameArea.workSpaceX, myGameArea.workSpaceY);
     //myTank = new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", 170, 470, "player")
-    myTanks.push(new PlayerTank(29, 29, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
+    myTanks.push(new PlayerTank(28, 28, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
     setTimeout(function () {
         for (var i = 0; i < 3; i++) {
             // enemyTanks.push(new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i*200, 0));
 
             if (typeof enemyTanks[i] == "undefined") {
-                enemyTanks[i] = new EnemyTank(29, 29, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo);
+                enemyTanks[i] = new EnemyTank(28, 28, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo);
 
             }
 
@@ -633,8 +660,13 @@ function updateGameArea() {
     //myTank.newPos();
     //myTank.update();
     for (var i = 0; i < myTanks.length; i++) {
-        myTanks[i].newPos();
-        myTanks[i].update();
+        if (typeof myTanks[i] != "undefined") {
+            myTanks[i].newPos();
+            myTanks[i].update();
+            myTanks[i].borderCheck(myObstacles);
+            
+
+        }
     }
 
     for (var i = 0; i < bullet.length; i++) {
