@@ -594,7 +594,7 @@ function startGame() {
     myGameArea.generateMap(map);
     background = new BackgroundAndScores(myGameArea.leftBorder, myGameArea.topBorder, myGameArea.workSpaceX, myGameArea.workSpaceY);
     //myTank = new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", 170, 470, "player")
-    myTanks.push(new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
+    myTanks.push(new PlayerTank(29, 29, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
     setTimeout(function () {
         for (var i = 0; i < 3; i++) {
             // enemyTanks.push(new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i*200, 0));
@@ -639,10 +639,10 @@ function updateGameArea() {
 
     for (var i = 0; i < bullet.length; i++) {
         if (typeof bullet[i] != "undefined") {
-            
             bullet[i].update();
+            bullet[i].collisionCheck(myObstacles, i);
+            
             if (typeof bullet[i] != "undefined") {
-                bullet[i].collisionCheck(myObstacles, i);
                 bullet[i].newPos();
             }
         }
@@ -673,7 +673,7 @@ function updateGameArea() {
             // (enemyTanks[i].borderCheck(myObstacles) != "collided") && enemyTanks[i].newPos();
             //enemyTanks[i].startMove(myGameArea.frameNo);
         } else {
-            enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo)
+            enemyTanks[i] = new EnemyTank(29, 29, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo)
         }
         for (var j = 0; j < bullet.length; j++) {
             bullet[j].collisionCheck(enemyTanks, j)
