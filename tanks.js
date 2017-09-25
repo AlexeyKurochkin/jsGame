@@ -7,6 +7,40 @@ var bullet = [];
 var enemyTanks = [];
 var background;
 
+// types:
+// 0 - empty
+// 1 - brick
+// 2 - concrete
+// 3 - grass
+
+var map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,2,2,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,2,2,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0],
+        [0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+        [1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1],
+        [2,2,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2,2],
+        [0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,1,1,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,0,1,1,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0]
+]
+
 
 var myGameArea = {
     canvas: document.createElement("canvas"),
@@ -14,10 +48,11 @@ var myGameArea = {
         this.canvas.width = 600;
         this.canvas.height = 600;
         this.leftBorder = 100;
-        this.rightBorder = 500;
+        this.rightBorder = 490;
         this.topBorder = 100;
-        this.bottomBorder = 500;
-        this.workSpace = 400;
+        this.bottomBorder = 490;
+        this.workSpaceX = 390;
+        this.workSpaceY = 390;
         this.enemyCount = 10;
         this.context = this.canvas.getContext("2d");
         document.body.appendChild(this.canvas);
@@ -27,7 +62,6 @@ var myGameArea = {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
             this.fired = true;
-
         });
         document.addEventListener("keyup", function (e) {
             myGameArea.keys[e.keyCode] = false;
@@ -51,7 +85,31 @@ var myGameArea = {
     },
     stop: function () {
         clearInterval(this.interval);
-    }
+    },
+    generateMap : function (mapSource) { 
+        for (var i = 0; i < mapSource.length; i++) {
+            var row = mapSource[i];
+            for (var j = 0; j < row.length; j++) {
+                var element = row[j];
+                switch (element) {
+                    case 0:
+                    
+                        break;
+                    case 1:
+                        myObstacles.push(new Obstacle(15, 15, "images/wall_brick.png", myGameArea.leftBorder + j*15, myGameArea.topBorder + i*15, 1))
+                        break;
+                    case 2:
+                        myObstacles.push(new Obstacle(15, 15, "images/wall_concrete.png", myGameArea.leftBorder + j*15, myGameArea.topBorder + i*15, 2))
+                        break;
+                    default:
+                        break;
+                }
+                
+                
+            }
+            
+        }
+     }
 }
 
 function BackgroundAndScores(x, y, width, height) {
@@ -152,7 +210,7 @@ function EnemyTank(width, height, image, position, type, startFrame) {
             this.y = myGameArea.topBorder;
             break;
         case 1:
-            this.x = (myGameArea.canvas.width - width) / 2;
+            this.x = (myGameArea.leftBorder + myGameArea.rightBorder)/2 - width/2 ;
             this.y = myGameArea.topBorder;
             break;
         case 2:
@@ -177,7 +235,8 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         ctx = myGameArea.context;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     };
-    this.newPos = function () {
+    this.newPos = function (col) {
+        
         switch (this.direction) {
             case "none":
                 this.startMove(myGameArea.frameNo);
@@ -185,17 +244,21 @@ function EnemyTank(width, height, image, position, type, startFrame) {
             case "up":
                 this.speedX = 0;
                 this.speedY = -1;
+                // this.speedY = 0;
                 break;
             case "down":
                 this.speedX = 0;
                 this.speedY = 1;
+                // this.speedY = 0;
                 break;
             case "left":
                 this.speedX = -1;
+                // this.speedX = 0;
                 this.speedY = 0;
                 break;
             case "right":
                 this.speedX = 1;
+                // this.speedX = 0;
                 this.speedY = 0;
                 break;
             default:
@@ -211,32 +274,61 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         }
 
         // this.speedY = 1;
-
-        this.x += this.speedX;
-        this.y += this.speedY;
+        if (col != "collided") {
+            this.x += this.speedX;
+            this.y += this.speedY;
+        }
         // this.hitBottom();
         // this.hitTop();
         // this.hitLeft();
         // this.hitRight();
-        this.borderCheck();
+        // this.borderCheck();
     };
-    this.borderCheck = function () {
+    this.borderCheck = function (object, i) {
         var borderBottom = myGameArea.bottomBorder - this.height;
         var borderTop = myGameArea.topBorder;
         var borderLeft = myGameArea.leftBorder;
         var borderRight = myGameArea.rightBorder - this.width;
         if (this.y > borderBottom) {
             this.y = borderBottom;
-            this.defineDirection();
+            this.speedX = 0;
+            this.speedY = 0;
+            this.defineDirection(this.direction );
+            return "collided";
         } else if (this.y < borderTop) {
             this.y = borderTop;
-            this.defineDirection();
+            this.speedX = 0;
+            this.speedY = 0;
+            this.defineDirection(this.direction);
+            return "collided";
         } else if (this.x < borderLeft) {
             this.x = borderLeft;
-            this.defineDirection();
+            this.speedX = 0;
+            this.speedY = 0;
+            this.defineDirection(this.direction);
+            return "collided";
         } else if (this.x > borderRight) {
             this.x = borderRight;
-            this.defineDirection();
+            this.speedX = 0;
+            this.speedY = 0;
+            this.defineDirection(this.direction);
+            return "collided";
+        }
+
+        for (var i = 0; i < object.length; i++) {
+            if (typeof object[i] != "undefined") {
+                if ((this.y < object[i].y + object[i].height) &&
+                    (this.y + this.height > object[i].y) &&
+                    (this.x + this.width > object[i].x) &&
+                    (this.x < object[i].x + object[i].width)) {
+                        this.speedX = 0;
+                        this.speedY = 0;
+                        this.defineDirection(this.direction);
+
+
+                        return "collided";
+                    }
+                }
         }
     }
     this.crashWith = function (otherObj) {
@@ -261,24 +353,56 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         enemyBullets.push(new Bullet(this));
         this.fired = true;
     }
-    this.defineDirection = function () {
-        var x = Math.floor(Math.random() * (4));
-        switch (x) {
+    this.defineDirection = function (dir) {
+
+        var dirNum;
+        if (dir == "up") {
+            dirNum = 0;
+            
+            (this.y != myGameArea.topBorder) && (this.y += 1);
+        } else if (dir == "right") {
+            dirNum = 1;
+            this.x -= 1  
+        } else if (dir == "down") {
+            dirNum = 2;
+            this.y -= 1;
+        } else if (dir == "left") {
+            dirNum = 3;
+            this.x += 1;
+        }
+
+        do {
+            var y = Math.floor(Math.random() * (4));
+            
+        } while (y == dirNum);
+
+
+        
+        switch (y) {
             case 0:
                 this.direction = "up";
-                this.image.src = "images/tank_basic_up_c0_t1.png"
+                this.image.src = "images/tank_basic_up_c0_t1.png";
+                this.speedX = 0;
+                
+                this.speedY = -1;
                 break;
             case 1:
                 this.direction = "right";
-                this.image.src = "images/tank_basic_right_c0_t1.png"
+                this.image.src = "images/tank_basic_right_c0_t1.png";
+                this.speedX = 1;
+                this.speedY = 0;
                 break;
             case 2:
                 this.direction = "down";
-                this.image.src = "images/tank_basic_down_c0_t1.png"
+                this.image.src = "images/tank_basic_down_c0_t1.png";
+                this.speedX = 0;
+                this.speedY = 1;
                 break;
             case 3:
                 this.direction = "left";
-                this.image.src = "images/tank_basic_left_c0_t1.png"
+                this.image.src = "images/tank_basic_left_c0_t1.png";
+                this.speedX = -1;
+                this.speedY = 0;
                 break;
         }
     }
@@ -287,7 +411,8 @@ function EnemyTank(width, height, image, position, type, startFrame) {
         //     this.direction = "down";
         // }
         if ((currentFrame - this.startFrame) > 80) {
-            this.direction = "down";
+            this.direction = "down"
+            this.speedY = 1;
         }
     }
 
@@ -307,26 +432,26 @@ function Bullet(sender) {
     this.direction = sender.direction;
     switch (this.direction) {
         case "up":
-            this.x = sender.x + sender.width / 2;
+            this.x = sender.x + (sender.width - this.width) / 2;
             this.y = sender.y;
             this.speedX = 0;
             this.speedY = -2;
             break;
         case "down":
-            this.x = sender.x + sender.width / 2;
+            this.x = sender.x + (sender.width - this.width) / 2;
             this.y = sender.y + sender.height;
             this.speedX = 0;
             this.speedY = 2;
             break;
         case "left":
             this.x = sender.x;
-            this.y = sender.y + sender.height / 2;
+            this.y = sender.y + (sender.height - this.height) / 2;
             this.speedX = -2;
             this.speedY = 0;
             break;
         case "right":
             this.x = sender.x + sender.width;
-            this.y = sender.y + sender.height / 2;
+            this.y = sender.y + (sender.height - this.height) / 2;
             this.speedX = 2;
             this.speedY = 0;
             break;
@@ -396,8 +521,8 @@ function Bullet(sender) {
         for (var i = 0; i < object.length; i++) {
             if (typeof object[i] != "undefined") {
                 if ((this.y < object[i].y + object[i].height) &&
-                    (this.y > object[i].y) &&
-                    (this.x > object[i].x) &&
+                    (this.y + this.height > object[i].y) &&
+                    (this.x + this.width > object[i].x) &&
                     (this.x < object[i].x + object[i].width)) {
                     if (object[i].type == "enemy") {
                         bullet.pop();
@@ -408,7 +533,7 @@ function Bullet(sender) {
                             alert("YOU WIN");
                             document.location.reload();
                         }
-                    } else {
+                    } else if (object[i].type == "player") {
                         delete enemyBullets[number];
                         sender.fired = false;
                         object[i].lives--;
@@ -418,6 +543,10 @@ function Bullet(sender) {
                             alert("GAME OVER");
                             document.location.reload();
                         }
+                    } else if (object[i].type == "1" || object[i].type == "2") {
+                        (sender.type == "player") ? bullet.pop() : delete enemyBullets[number];
+                        sender.fired = false;
+                        (object[i].type == "1" ) && delete object[i];
 
                     }
                 }
@@ -442,22 +571,36 @@ function Bullet(sender) {
 
 }
 
-
+//OBSTACLES OBSTACLES OBSTACLES OBSTACLES OBSTACLES OBSTACLES 
+function Obstacle(width, height, image, x, y, type) {
+    this.type = type;
+    this.image = new Image();
+    this.image.src = image;
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.update = function () {
+        ctx = myGameArea.context;
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    };
+}
 
 
 
 
 function startGame() {
     myGameArea.start();
-    background = new BackgroundAndScores(myGameArea.leftBorder, myGameArea.topBorder, myGameArea.workSpace, myGameArea.workSpace);
+    myGameArea.generateMap(map);
+    background = new BackgroundAndScores(myGameArea.leftBorder, myGameArea.topBorder, myGameArea.workSpaceX, myGameArea.workSpaceY);
     //myTank = new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", 170, 470, "player")
-    myTanks.push(new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 170, myGameArea.bottomBorder - 30, "player"))
+    myTanks.push(new PlayerTank(30, 30, "images/tank_player1_up_c0_t1.png", myGameArea.leftBorder + 120, myGameArea.bottomBorder - 30, "player"))
     setTimeout(function () {
         for (var i = 0; i < 3; i++) {
             // enemyTanks.push(new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i*200, 0));
 
             if (typeof enemyTanks[i] == "undefined") {
-                enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo);
+                enemyTanks[i] = new EnemyTank(29, 29, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo);
 
             }
 
@@ -477,6 +620,16 @@ function updateGameArea() {
     myGameArea.clear();
     background.update(myTanks[0].lives);
     myGameArea.frameNo += 1;
+
+    for (var i = 0; i < myObstacles.length; i++) {
+        if (typeof myObstacles[i] != "undefined") {
+            myObstacles[i].update();
+        }
+        
+        
+    }
+
+
     //myTank.newPos();
     //myTank.update();
     for (var i = 0; i < myTanks.length; i++) {
@@ -485,8 +638,14 @@ function updateGameArea() {
     }
 
     for (var i = 0; i < bullet.length; i++) {
-        bullet[i].update();
-        bullet[i].newPos();
+        if (typeof bullet[i] != "undefined") {
+            
+            bullet[i].update();
+            if (typeof bullet[i] != "undefined") {
+                bullet[i].collisionCheck(myObstacles, i);
+                bullet[i].newPos();
+            }
+        }
     }
 
     for (var i = 0; i < enemyBullets.length; i++) {
@@ -494,6 +653,7 @@ function updateGameArea() {
         if (typeof enemyBullets[i] != "undefined") {
             enemyBullets[i].update();
             enemyBullets[i].collisionCheck(myTanks, i);
+            (typeof enemyBullets[i] != "undefined") && enemyBullets[i].collisionCheck(myObstacles, i);
             if (typeof enemyBullets[i] != "undefined") {
                 enemyBullets[i].newPos(i);
             }
@@ -508,6 +668,9 @@ function updateGameArea() {
         if (typeof enemyTanks[i] != "undefined") {
             enemyTanks[i].update();
             enemyTanks[i].newPos();
+            enemyTanks[i].borderCheck(myObstacles);
+
+            // (enemyTanks[i].borderCheck(myObstacles) != "collided") && enemyTanks[i].newPos();
             //enemyTanks[i].startMove(myGameArea.frameNo);
         } else {
             enemyTanks[i] = new EnemyTank(30, 30, "images/tank_basic_down_c0_t1.png", i, "enemy", myGameArea.frameNo)
@@ -516,11 +679,4 @@ function updateGameArea() {
             bullet[j].collisionCheck(enemyTanks, j)
         }
     }
-
-    if (typeof enemyTank1 != "undefined") {
-        enemyTank1.newPos();
-        enemyTank1.update();
-
-    }
-
 }
